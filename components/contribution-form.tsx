@@ -211,8 +211,10 @@ export default function ContributionForm() {
 
           <div>
             <Label htmlFor="reportedSweetness">Sweetness level</Label>
-            <select id="reportedSweetness" name="reportedSweetness" className={selectClass} disabled={isPending} defaultValue="">
-              <option value="">Not Applicable</option>
+            <select id="reportedSweetness" name="reportedSweetness" className={selectClass} disabled={isPending} defaultValue="" required={!!parsed?.mmValue}>
+              <option value="" disabled={!!parsed?.mmValue}>
+                {parsed?.mmValue ? 'Select Sweetness Level' : 'Not Applicable'}
+              </option>
               <option value="normal">Normal Sweet</option>
               <option value="less">Less Sweet</option>
               <option value="slightly">Slightly Sweet</option>
