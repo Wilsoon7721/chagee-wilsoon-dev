@@ -33,7 +33,18 @@ export default function RootLayout({ children }: LayoutProps<'/'>) {
         <main className="mx-auto w-full max-w-5xl flex-1 px-4 py-8">{children}</main>
 
         <footer className="border-t border-zinc-200 py-6 dark:border-zinc-800">
-          <p className="text-center text-xs text-zinc-400 dark:text-zinc-600">This is a community research project, and is not affiliated with CHAGEE.</p>
+          <div className="flex flex-col items-center justify-center gap-3">
+            <p className="text-center text-xs text-zinc-400 dark:text-zinc-600">This is a community research project, and is not affiliated with CHAGEE.</p>
+            <div className="flex items-center justify-center gap-3 text-xs text-zinc-400 dark:text-zinc-600">
+              <a href="https://github.com/Wilsoon7721/chagee-wilsoon-dev" target="_blank" rel="noopener noreferrer" className="cursor-pointer hover:text-zinc-900 dark:hover:text-zinc-300 transition-colors">
+                Source Code
+              </a>
+              <span>&middot;</span>
+              <a href="https://reddit.com/u/Java7421" target="_blank" rel="noopener noreferrer" className="cursor-pointer hover:text-zinc-900 dark:hover:text-zinc-300 transition-colors">
+                Contact (Reddit)
+              </a>
+            </div>
+          </div>
         </footer>
       </body>
     </html>

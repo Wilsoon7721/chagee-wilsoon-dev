@@ -113,6 +113,21 @@ export default async function CatalogPage() {
             I am doing the survey simply to get the data to confirm the actual relationships. Once I&apos;m able to confirm the mappings, I plan to create an open-source tool that allows just the QR code to show the item ordered and its details.
           </p>
         </div>
+
+        <div>
+          <h3 className="text-lg font-medium text-zinc-900 dark:text-zinc-50">What if I have issues or want to submit privately?</h3>
+          <p className="mt-2 text-sm leading-relaxed text-zinc-600 dark:text-zinc-400">
+            If you run into issues with the website or prefer to submit your QR code privately, feel free to send a private message to my Reddit account (
+            <a href="https://reddit.com/u/Java7421" target="_blank" rel="noopener noreferrer" className="cursor-pointer font-medium text-zinc-900 underline underline-offset-2 hover:text-zinc-600 dark:text-zinc-50 dark:hover:text-zinc-300">
+              u/Java7421
+            </a>
+            ). The source code for this project is also available on{' '}
+            <a href="https://github.com/Wilsoon7721/chagee-wilsoon-dev" target="_blank" rel="noopener noreferrer" className="cursor-pointer font-medium text-zinc-900 underline underline-offset-2 hover:text-zinc-600 dark:text-zinc-50 dark:hover:text-zinc-300">
+              GitHub
+            </a>
+            .
+          </p>
+        </div>
       </div>
     </div>
   );
