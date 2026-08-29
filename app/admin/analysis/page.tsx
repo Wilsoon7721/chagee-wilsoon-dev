@@ -136,8 +136,10 @@ function SummaryStats({ rows }: { rows: SweetnessAnalysisRow[] }) {
 export default async function AnalysisPage() {
   try {
     await requireSession(authConfig, { roles: ['admin'] });
-  } catch {
-    redirect('/admin/login');
+  } catch (err: any) {
+    console.error('[admin/analysis] session verification failed:', err);
+    const code = err.code ? err.code.toLowerCase() : 'auth_failed';
+    redirect(`/admin/login?error=${code}`);
   }
 
   const supabase = createPrivilegedSupabaseClient();

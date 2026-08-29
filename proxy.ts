@@ -4,10 +4,10 @@ import { authConfig } from './lib/auth-config';
 export const proxy = createAuthMiddleware({
   ...authConfig,
   loginPath: '/admin/login',
-  unauthorizedPath: '/admin/login?error=forbidden',
+  unauthorizedPath: '/admin/login',
   roles: ['admin']
 });
 
 export const config = {
-  matcher: ['/admin/((?!login$).*)']
+  matcher: ['/admin', '/admin/((?!login$).*)']
 };

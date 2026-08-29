@@ -75,9 +75,9 @@ export async function submitContribution(formData: FormData): Promise<SubmitResu
     if (!r.ok) throw new Error(`siteverify ${r.status}`);
 
     const result = await r.json();
-    if (!result.success || result.action !== 'submit_contribution') return { success: false, error: 'CAPTCHA verification failed.' };
-  } catch (err) {
-    return { success: false, error: 'CAPTCHA verification failed due to network error.' };
+    if (!result.success || result.action !== 'submit_contribution') return { success: false, error: `CAPTCHA verification failed: ${JSON.stringify(result['error-codes'])}` };
+  } catch (err: any) {
+    return { success: false, error: `CAPTCHA verification failed: ${err.message}` };
   }
 
   let imagePath: string | null = null;
@@ -98,7 +98,7 @@ export async function submitContribution(formData: FormData): Promise<SubmitResu
 
     if (uploadError) {
       console.error('[submit] image upload failed:', uploadError.message);
-      return { success: false, error: 'Image upload failed. Please try again.' };
+      return { success: false, error: `Image upload failed: ${uploadError.message}` };
     }
 
     const { data: signedData } = await supabase.storage.from(BUCKET_NAME).createSignedUrl(imagePath, 60 * 60 * 24 * 365 * 10);
@@ -134,7 +134,7 @@ export async function submitContribution(formData: FormData): Promise<SubmitResu
 
   if (insertError) {
     console.error('[submit] insert failed:', insertError.message);
-    return { success: false, error: 'Submission failed. Please try again.' };
+    return { success: false, error: `Submission failed: ${insertError.message}` };
   }
 
   return { success: true, contributionId: (data as any).id };

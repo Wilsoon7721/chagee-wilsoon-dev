@@ -106,8 +106,10 @@ function ContributionCard({ row }: { row: AdminPendingContribution }) {
 export default async function AdminPage() {
   try {
     await requireSession(authConfig, { roles: ['admin'] });
-  } catch {
-    redirect('/admin/login');
+  } catch (err: any) {
+    console.error('[admin] session verification failed:', err);
+    const code = err.code ? err.code.toLowerCase() : 'auth_failed';
+    redirect(`/admin/login?error=${code}`);
   }
 
   const supabase = createPrivilegedSupabaseClient();

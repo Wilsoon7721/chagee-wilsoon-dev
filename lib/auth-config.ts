@@ -13,3 +13,6 @@ export const authConfig: AuthConfig = {
   redirectUri: `${appUrl}/api/auth/callback`,
   scope: ['openid', 'profile', 'email']
 };
+
+export const AUTH_ATTEMPT_COOKIE = 'wilsoon_auth_attempts';
+export const MAX_AUTH_ATTEMPTS = 3;

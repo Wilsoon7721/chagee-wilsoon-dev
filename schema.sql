@@ -371,11 +371,11 @@ $$ LANGUAGE plpgsql IMMUTABLE;
 CREATE OR REPLACE FUNCTION chagee.set_contribution_flags(contrib_id UUID) RETURNS VOID AS $$
 DECLARE contrib RECORD;
 drink RECORD;
-flag_new_sku BOOLEAN := FALSE;
-flag_new_codes BOOLEAN := FALSE;
-flag_size_mismatch BOOLEAN := FALSE;
-flag_missing_expected_milk BOOLEAN := FALSE;
-flag_unexpected_milk BOOLEAN := FALSE;
+v_flag_new_sku BOOLEAN := FALSE;
+v_flag_new_codes BOOLEAN := FALSE;
+v_flag_size_mismatch BOOLEAN := FALSE;
+v_flag_missing_expected_milk BOOLEAN := FALSE;
+v_flag_unexpected_milk BOOLEAN := FALSE;
 BEGIN
 SELECT * INTO contrib
 FROM chagee.contributions
@@ -386,7 +386,7 @@ END IF;
 SELECT * INTO drink
 FROM chagee.drink_skus
 WHERE sku_code = contrib.sku_value;
-IF NOT FOUND THEN flag_new_sku := TRUE;
+IF NOT FOUND THEN v_flag_new_sku := TRUE;
 END IF;
 -- Flag 2: Unknown codes (A, C, m, mm)
 IF contrib.a_value IS NOT NULL
@@ -394,28 +394,28 @@ AND NOT EXISTS (
   SELECT 1
   FROM chagee.cup_size_codes
   WHERE code = contrib.a_value
-) THEN flag_new_codes := TRUE;
+) THEN v_flag_new_codes := TRUE;
 END IF;
 IF contrib.c_value IS NOT NULL
 AND NOT EXISTS (
   SELECT 1
   FROM chagee.milk_codes
   WHERE code = contrib.c_value
-) THEN flag_new_codes := TRUE;
+) THEN v_flag_new_codes := TRUE;
 END IF;
 IF contrib.m_value IS NOT NULL
 AND NOT EXISTS (
   SELECT 1
   FROM chagee.ice_codes
   WHERE code = contrib.m_value
-) THEN flag_new_codes := TRUE;
+) THEN v_flag_new_codes := TRUE;
 END IF;
 IF contrib.mm_value IS NOT NULL
 AND NOT EXISTS (
   SELECT 1
   FROM chagee.sweetness_codes
   WHERE code = contrib.mm_value
-) THEN flag_new_codes := TRUE;
+) THEN v_flag_new_codes := TRUE;
 -- Auto-insert new sweetness code for tracking
 INSERT INTO chagee.sweetness_codes (code, preset_number, description, first_seen_at)
 VALUES (
@@ -445,24 +445,24 @@ AND contrib.reported_size IS NOT NULL THEN IF (
 OR (
   contrib.a_value = 'A002'
   AND contrib.reported_size = 'large'
-) THEN flag_size_mismatch := TRUE;
+  ) THEN v_flag_size_mismatch := TRUE;
 END IF;
 END IF;
 -- Flag 4: Missing expected milk (only for known machine-milk drinks)
 IF drink.uses_machine_milk = TRUE
-AND contrib.c_value IS NULL THEN flag_missing_expected_milk := TRUE;
+AND contrib.c_value IS NULL THEN v_flag_missing_expected_milk := TRUE;
 END IF;
 -- Flag 5: Unexpected milk (only for known no-milk drinks)
 IF drink.has_milk = FALSE
-AND contrib.c_value IS NOT NULL THEN flag_unexpected_milk := TRUE;
+AND contrib.c_value IS NOT NULL THEN v_flag_unexpected_milk := TRUE;
 END IF;
 -- Update the contribution
 UPDATE chagee.contributions
-SET flag_new_sku = flag_new_sku,
-  flag_new_codes = flag_new_codes,
-  flag_size_mismatch = flag_size_mismatch,
-  flag_missing_expected_milk = flag_missing_expected_milk,
-  flag_unexpected_milk = flag_unexpected_milk
+SET flag_new_sku = v_flag_new_sku,
+  flag_new_codes = v_flag_new_codes,
+  flag_size_mismatch = v_flag_size_mismatch,
+  flag_missing_expected_milk = v_flag_missing_expected_milk,
+  flag_unexpected_milk = v_flag_unexpected_milk
 WHERE id = contrib_id;
 END;
 $$ LANGUAGE plpgsql;
