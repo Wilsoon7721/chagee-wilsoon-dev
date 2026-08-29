@@ -144,25 +144,27 @@ export function parseQrPayload(rawPayload: string): QrParseResult {
   };
 }
 
+export type DynamicSkuMap = Record<string, { name: string; hasMilk: boolean; usesMachineMilk: boolean; category: string }>;
+
 /**
  * Check if a SKU is already known/mapped.
  */
-export function isKnownSku(skuValue: string): boolean {
-  return skuValue in KNOWN_SKUS;
+export function isKnownSku(skuValue: string, dynamicSkus?: DynamicSkuMap): boolean {
+  return skuValue in KNOWN_SKUS || !!dynamicSkus?.[skuValue];
 }
 
 /**
  * Get the known drink name for a SKU, if available.
  */
-export function getKnownDrinkName(skuValue: string): string | null {
-  return KNOWN_SKUS[skuValue]?.name ?? null;
+export function getKnownDrinkName(skuValue: string, dynamicSkus?: DynamicSkuMap): string | null {
+  return KNOWN_SKUS[skuValue]?.name ?? dynamicSkus?.[skuValue]?.name ?? null;
 }
 
 /**
  * Check if a drink SKU is expected to have milk based on known data.
  */
-export function isExpectedToHaveMilk(skuValue: string): boolean | null {
-  const known = KNOWN_SKUS[skuValue];
+export function isExpectedToHaveMilk(skuValue: string, dynamicSkus?: DynamicSkuMap): boolean | null {
+  const known = KNOWN_SKUS[skuValue] ?? dynamicSkus?.[skuValue];
   return known ? known.hasMilk : null;
 }
 
@@ -218,11 +220,11 @@ export interface PayloadAnomaly {
  * Detect potential anomalies in a parsed payload.
  * This is a preliminary check before server-side validation.
  */
-export function detectAnomalies(parsed: ParsedQrPayload): PayloadAnomaly[] {
+export function detectAnomalies(parsed: ParsedQrPayload, dynamicSkus?: DynamicSkuMap): PayloadAnomaly[] {
   const anomalies: PayloadAnomaly[] = [];
 
   // Check 1: Unknown SKU (new drink discovery!)
-  if (!isKnownSku(parsed.skuValue))
+  if (!isKnownSku(parsed.skuValue, dynamicSkus))
     anomalies.push({
       type: 'unknown_sku',
       severity: 'info',
@@ -247,9 +249,9 @@ export function detectAnomalies(parsed: ParsedQrPayload): PayloadAnomaly[] {
     });
 
   // Check 2: Milk inconsistency
-  const expectedMilk = isExpectedToHaveMilk(parsed.skuValue);
+  const expectedMilk = isExpectedToHaveMilk(parsed.skuValue, dynamicSkus);
   const isNonDrink = ['special', 'cake', 'bakery'].includes(getSkuType(parsed.skuValue));
-  const usesMachineMilk = KNOWN_SKUS[parsed.skuValue]?.usesMachineMilk ?? true;
+  const usesMachineMilk = KNOWN_SKUS[parsed.skuValue]?.usesMachineMilk ?? dynamicSkus?.[parsed.skuValue]?.usesMachineMilk ?? true;
 
   if (expectedMilk !== null && !isNonDrink) {
     const hasMilkCode = parsed.cValue !== null;
@@ -258,14 +260,14 @@ export function detectAnomalies(parsed: ParsedQrPayload): PayloadAnomaly[] {
         anomalies.push({
           type: 'missing_milk_code',
           severity: 'critical',
-          message: `This drink (${getKnownDrinkName(parsed.skuValue)}) should have a milk code, but none was found.`,
+          message: `This drink (${getKnownDrinkName(parsed.skuValue, dynamicSkus)}) should have a milk code, but none was found.`,
           field: 'cValue'
         });
       else {
         anomalies.push({
           type: 'hand_poured_milk',
           severity: 'info',
-          message: `${getKnownDrinkName(parsed.skuValue)} actually contains milk. However, I believe their recipe includes a milk that they measure and pour out themselves. As such, there's actually no milk code, and Milk should be "Not Applicable".`,
+          message: `${getKnownDrinkName(parsed.skuValue, dynamicSkus)} actually contains milk. However, I believe their recipe includes a milk that they measure and pour out themselves. As such, there's actually no milk code, and Milk should be "Not Applicable".`,
           field: 'cValue'
         });
       }
@@ -273,7 +275,7 @@ export function detectAnomalies(parsed: ParsedQrPayload): PayloadAnomaly[] {
       anomalies.push({
         type: 'unexpected_milk_code',
         severity: 'critical',
-        message: `This drink (${getKnownDrinkName(parsed.skuValue)}) is a pure tea but has a milk code (${parsed.cValue}).`,
+        message: `This drink (${getKnownDrinkName(parsed.skuValue, dynamicSkus)}) is a pure tea but has a milk code (${parsed.cValue}).`,
         field: 'cValue'
       });
   }

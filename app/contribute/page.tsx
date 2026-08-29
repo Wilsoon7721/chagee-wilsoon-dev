@@ -7,7 +7,24 @@ export const metadata: Metadata = {
   title: 'Contribute'
 };
 
-export default function ContributePage() {
+import { createServerSupabaseClient } from '@/lib/supabase';
+import type { DynamicSkuMap } from '@/lib/qr-parser';
+
+export default async function ContributePage() {
+  const supabase = await createServerSupabaseClient();
+  const { data: drinks } = await supabase.from('public_drinks').select('sku_code, drink_name, has_milk, uses_machine_milk, drink_category');
+
+  const dynamicSkus: DynamicSkuMap = {};
+  for (const drink of drinks ?? []) {
+    if (drink.sku_code)
+      dynamicSkus[drink.sku_code] = {
+        name: drink.drink_name || '',
+        hasMilk: drink.has_milk ?? false,
+        usesMachineMilk: drink.uses_machine_milk ?? true,
+        category: drink.drink_category || ''
+      };
+  }
+
   return (
     <div className="mx-auto max-w-lg space-y-6">
       <div className="space-y-4">
@@ -52,7 +69,7 @@ export default function ContributePage() {
 
       <hr className="border-zinc-200 dark:border-zinc-800" />
 
-      <ContributionForm />
+      <ContributionForm dynamicSkus={dynamicSkus} />
     </div>
   );
 }

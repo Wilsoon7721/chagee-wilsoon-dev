@@ -2,7 +2,7 @@
 
 import { submitContribution } from '@/app/actions/submit-contribution';
 import type { ParsedQrPayload } from '@/lib/database.types';
-import { decodeCupSize, decodeIceLevel, decodeMilkType, detectAnomalies, extractSweetnessPreset, getKnownDrinkName, getSkuType, isKnownSku, parseQrPayload, type PayloadAnomaly } from '@/lib/qr-parser';
+import { decodeCupSize, decodeIceLevel, decodeMilkType, detectAnomalies, extractSweetnessPreset, getKnownDrinkName, getSkuType, isKnownSku, parseQrPayload, type DynamicSkuMap, type PayloadAnomaly } from '@/lib/qr-parser';
 import { Turnstile } from '@marsidev/react-turnstile';
 import Link from 'next/link';
 import { useRef, useState, useTransition } from 'react';
@@ -43,11 +43,11 @@ function AnomalyBadge({ anomaly }: { anomaly: PayloadAnomaly }) {
   );
 }
 
-function ParsedSummary({ parsed }: { parsed: ParsedQrPayload }) {
+function ParsedSummary({ parsed, dynamicSkus }: { parsed: ParsedQrPayload; dynamicSkus?: DynamicSkuMap }) {
   const rows: Array<[string, string | null]> = [
     ['Transaction', parsed.tValue],
     ['SKU', parsed.skuValue],
-    ['Known Item', getKnownDrinkName(parsed.skuValue)],
+    ['Known Item', getKnownDrinkName(parsed.skuValue, dynamicSkus)],
     ['Cup Size', decodeCupSize(parsed.aValue) ?? parsed.aValue ?? '-'],
     ['Milk', decodeMilkType(parsed.cValue) ?? parsed.cValue ?? '-'],
     ['Ice', decodeIceLevel(parsed.mValue) ?? parsed.mValue ?? '-'],
@@ -70,7 +70,7 @@ function ParsedSummary({ parsed }: { parsed: ParsedQrPayload }) {
   );
 }
 
-export default function ContributionForm() {
+export default function ContributionForm({ dynamicSkus }: { dynamicSkus?: DynamicSkuMap }) {
   const [step, setStep] = useState<Step>('scan');
   const [parsed, setParsed] = useState<ParsedQrPayload | null>(null);
   const [anomalies, setAnomalies] = useState<PayloadAnomaly[]>([]);
@@ -92,7 +92,7 @@ export default function ContributionForm() {
 
     setParseError(null);
     setParsed(result.data);
-    setAnomalies(detectAnomalies(result.data));
+    setAnomalies(detectAnomalies(result.data, dynamicSkus));
     setStep('form');
   }
 
@@ -169,7 +169,7 @@ export default function ContributionForm() {
 
   return (
     <div className="space-y-6">
-      {parsed && <ParsedSummary parsed={parsed} />}
+      {parsed && <ParsedSummary parsed={parsed} dynamicSkus={dynamicSkus} />}
 
       {/* Anomaly alerts */}
       {anomalies.length > 0 && (
@@ -195,7 +195,16 @@ export default function ContributionForm() {
               <p className="text-sm leading-relaxed text-blue-700 dark:text-blue-400/90">Notice: Since this looks like a cake or bakery item, you only need to fill in the Item Name. You can ignore the other fields.</p>
             </div>
           )}
-          <input id="reportedDrinkName" name="reportedDrinkName" type="text" required placeholder="e.g. Peach Oolong Milk Tea" defaultValue={parsed ? (getKnownDrinkName(parsed.skuValue) ?? '') : ''} className={inputClass} disabled={isPending} />
+          <input
+            id="reportedDrinkName"
+            name="reportedDrinkName"
+            type="text"
+            required
+            placeholder="e.g. Peach Oolong Milk Tea"
+            defaultValue={parsed ? (getKnownDrinkName(parsed.skuValue, dynamicSkus) ?? '') : ''}
+            className={inputClass}
+            disabled={isPending}
+          />
         </div>
 
         {/* Size + Sweetness row */}
