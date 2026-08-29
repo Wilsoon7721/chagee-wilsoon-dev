@@ -29,5 +29,11 @@
     ],
     "images": {
         "binding": "IMAGES"
+    },
+    "vars": {
+        "NEXT_PUBLIC_SUPABASE_URL": "https://xzggjlxocwclieepmzki.supabase.co",
+        "NEXT_PUBLIC_BUCKET_NAME": "chagee-study",
+        "WILSOON_CLIENT_ID": "cl_b5b00c1812fc5ad593e84131833506c5",
+        "NEXT_PUBLIC_TURNSTILE_SITE_KEY": "0x4AAAAAAEg_0ZpmpUHki09g"
     }
 }
