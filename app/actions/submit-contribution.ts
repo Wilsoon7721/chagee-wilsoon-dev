@@ -34,7 +34,6 @@ export async function submitContribution(formData: FormData): Promise<SubmitResu
   const defaultSize = parsed.aValue === 'A001' ? 'large' : 'regular';
   const defaultIce = parsed.mValue === 'm001' ? 'normal' : parsed.mValue === 'm002' ? 'less' : parsed.mValue === 'm003' ? 'none' : '';
   const defaultMilk = parsed.cValue === 'C001' ? 'Regular Fresh Milk' : parsed.cValue === 'C002' ? 'Oat Milk' : parsed.cValue === 'C003' ? 'Non-Fat Milk' : '';
-  const defaultSweetness = '';
 
   const skuType = getSkuType(parsed.skuValue);
   const isBakeryOrCakeOrSpecial = skuType === 'cake' || skuType === 'bakery' || skuType === 'special' || skuType === 'unknown';
@@ -43,7 +42,7 @@ export async function submitContribution(formData: FormData): Promise<SubmitResu
   if (!isKnown) isModified = true;
   else if (isBakeryOrCakeOrSpecial) isModified = reportedDrinkName !== defaultDrinkName;
   else {
-    isModified = reportedDrinkName !== defaultDrinkName || (reportedSize || 'regular') !== defaultSize || (reportedIce || '') !== defaultIce || (reportedMilkType || '') !== defaultMilk || (reportedSweetness || '') !== defaultSweetness;
+    isModified = reportedDrinkName !== defaultDrinkName || (reportedSize || 'regular') !== defaultSize || (reportedIce || '') !== defaultIce || (reportedMilkType || '') !== defaultMilk;
   }
 
   if (isModified && (!imageFile || imageFile.size === 0)) return { success: false, error: 'A sticker photo is required if you modify the autofilled values (or for unmapped items).' };
