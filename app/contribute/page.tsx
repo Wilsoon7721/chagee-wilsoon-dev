@@ -9,13 +9,16 @@ export const metadata: Metadata = {
 
 import { createServerSupabaseClient } from '@/lib/supabase';
 import type { DynamicSkuMap } from '@/lib/qr-parser';
+import type { PublicDrink } from '@/lib/database.types';
 
 export default async function ContributePage() {
   const supabase = await createServerSupabaseClient();
   const { data: drinks } = await supabase.from('public_drinks').select('sku_code, drink_name, has_milk, uses_machine_milk, drink_category');
 
+  const publicDrinks = drinks as PublicDrink[] | null;
+
   const dynamicSkus: DynamicSkuMap = {};
-  for (const drink of drinks ?? []) {
+  for (const drink of publicDrinks ?? []) {
     if (drink.sku_code)
       dynamicSkus[drink.sku_code] = {
         name: drink.drink_name || '',
