@@ -269,7 +269,7 @@ export interface Database {
       };
       contributions: {
         Row: Contribution;
-        Insert: Omit<Contribution, 'id' | 'created_at' | 'updated_at' | 'flag_new_sku' | 'flag_new_codes' | 'flag_size_mismatch' | 'flag_missing_expected_milk' | 'flag_unexpected_milk'>;
+        Insert: Omit<Contribution, 'id' | 'created_at' | 'updated_at' | 'submitted_at' | 'reviewed_at' | 'reviewed_by' | 'review_notes' | 'flag_new_sku' | 'flag_new_codes' | 'flag_size_mismatch' | 'flag_missing_expected_milk' | 'flag_unexpected_milk'> & { status?: ContributionStatus, submitted_at?: string };
         Update: Partial<Omit<Contribution, 'id'>>;
       };
       sweetness_observations: {
@@ -306,5 +306,6 @@ export interface Database {
       cup_size: CupSize;
       sku_type: SkuType;
     };
+    CompositeTypes: Record<string, never>;
   };
 }

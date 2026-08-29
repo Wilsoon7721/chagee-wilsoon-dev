@@ -106,7 +106,7 @@ export async function submitContribution(formData: FormData): Promise<SubmitResu
     imageUrl = signedData?.signedUrl ?? null;
   }
 
-  const supabase = createPrivilegedSupabaseClient();
+  const supabase = createPrivilegedSupabaseClient() as any;
   const { data, error: insertError } = await supabase
     .from('contributions')
     .insert({
@@ -129,7 +129,7 @@ export async function submitContribution(formData: FormData): Promise<SubmitResu
       submitter_ip_hash: ipHash,
       user_agent: userAgentHeader,
       status: 'pending'
-    })
+    } as any)
     .select('id')
     .single();
 
@@ -138,5 +138,5 @@ export async function submitContribution(formData: FormData): Promise<SubmitResu
     return { success: false, error: 'Submission failed. Please try again.' };
   }
 
-  return { success: true, contributionId: data.id };
+  return { success: true, contributionId: (data as any).id };
 }

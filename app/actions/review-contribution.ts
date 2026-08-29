@@ -17,7 +17,7 @@ export interface ReviewResult {
 export async function approveContribution(id: string): Promise<ReviewResult> {
   await assertAdmin();
 
-  const supabase = createPrivilegedSupabaseClient();
+  const supabase = createPrivilegedSupabaseClient() as any;
   const { error } = await supabase.from('contributions').update({ status: 'approved', reviewed_at: new Date().toISOString() }).eq('id', id);
 
   if (error) {
@@ -33,7 +33,7 @@ export async function approveContribution(id: string): Promise<ReviewResult> {
 export async function rejectContribution(id: string, note?: string): Promise<ReviewResult> {
   await assertAdmin();
 
-  const supabase = createPrivilegedSupabaseClient();
+  const supabase = createPrivilegedSupabaseClient() as any;
   const { error } = await supabase
     .from('contributions')
     .update({ status: 'rejected', reviewed_at: new Date().toISOString(), review_notes: note ?? null })
