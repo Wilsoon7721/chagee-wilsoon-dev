@@ -122,7 +122,11 @@ export default async function CatalogPage() {
               u/Java7421
             </a>
             ). The source code for this project is also available on{' '}
-            <a href="https://github.com/Wilsoon7721/chagee-wilsoon-dev" target="_blank" rel="noopener noreferrer" className="cursor-pointer font-medium text-zinc-900 underline underline-offset-2 hover:text-zinc-600 dark:text-zinc-50 dark:hover:text-zinc-300">
+            <a
+              href="https://github.com/Wilsoon7721/chagee-wilsoon-dev"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="cursor-pointer font-medium text-zinc-900 underline underline-offset-2 hover:text-zinc-600 dark:text-zinc-50 dark:hover:text-zinc-300">
               GitHub
             </a>
             .

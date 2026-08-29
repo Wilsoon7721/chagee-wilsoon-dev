@@ -14,9 +14,9 @@ export interface SubmitResult {
 export async function submitContribution(formData: FormData): Promise<SubmitResult> {
   const rawPayload = (formData.get('rawPayload') as string | null)?.trim() ?? '';
   const reportedDrinkName = (formData.get('reportedDrinkName') as string | null)?.trim() ?? '';
-  const reportedSize = formData.get('reportedSize') as CupSize | null;
-  const reportedSweetness = formData.get('reportedSweetness') as SweetnessLevel | null;
-  const reportedIce = formData.get('reportedIce') as IceLevel | null;
+  const reportedSize = (formData.get('reportedSize') as CupSize | null) || null;
+  const reportedSweetness = (formData.get('reportedSweetness') as SweetnessLevel | null) || null;
+  const reportedIce = (formData.get('reportedIce') as IceLevel | null) || null;
   const reportedMilkType = (formData.get('reportedMilkType') as string | null)?.trim() || null;
   const imageFile = formData.get('imageFile') as File | null;
   const userAgentHeader = (await headers()).get('user-agent') ?? '';
