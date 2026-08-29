@@ -249,16 +249,26 @@ export function detectAnomalies(parsed: ParsedQrPayload): PayloadAnomaly[] {
   // Check 2: Milk inconsistency
   const expectedMilk = isExpectedToHaveMilk(parsed.skuValue);
   const isNonDrink = ['special', 'cake', 'bakery'].includes(getSkuType(parsed.skuValue));
+  const usesMachineMilk = KNOWN_SKUS[parsed.skuValue]?.usesMachineMilk ?? true;
 
   if (expectedMilk !== null && !isNonDrink) {
     const hasMilkCode = parsed.cValue !== null;
     if (expectedMilk && !hasMilkCode)
-      anomalies.push({
-        type: 'missing_milk_code',
-        severity: 'critical',
-        message: `This drink (${getKnownDrinkName(parsed.skuValue)}) should have a milk code, but none was found.`,
-        field: 'cValue'
-      });
+      if (usesMachineMilk)
+        anomalies.push({
+          type: 'missing_milk_code',
+          severity: 'critical',
+          message: `This drink (${getKnownDrinkName(parsed.skuValue)}) should have a milk code, but none was found.`,
+          field: 'cValue'
+        });
+      else {
+        anomalies.push({
+          type: 'hand_poured_milk',
+          severity: 'info',
+          message: `${getKnownDrinkName(parsed.skuValue)} actually contains milk. However, I believe their recipe includes a milk that they measure and pour out themselves. As such, there's actually no milk code, and Milk should be "Not Applicable".`,
+          field: 'cValue'
+        });
+      }
     else if (!expectedMilk && hasMilkCode)
       anomalies.push({
         type: 'unexpected_milk_code',
