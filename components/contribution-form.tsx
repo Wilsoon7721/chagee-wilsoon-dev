@@ -3,7 +3,7 @@
 import { submitContribution } from '@/app/actions/submit-contribution';
 import type { ParsedQrPayload } from '@/lib/database.types';
 import { decodeCupSize, decodeIceLevel, decodeMilkType, detectAnomalies, extractSweetnessPreset, getKnownDrinkName, getSkuType, isKnownSku, parseQrPayload, type PayloadAnomaly } from '@/lib/qr-parser';
-import Script from 'next/script';
+import { Turnstile } from '@marsidev/react-turnstile';
 import Link from 'next/link';
 import { useRef, useState, useTransition } from 'react';
 import QrScanner from './qr-scanner';
@@ -169,7 +169,6 @@ export default function ContributionForm() {
 
   return (
     <div className="space-y-6">
-      <Script src="https://challenges.cloudflare.com/turnstile/v0/api.js" />
       {parsed && <ParsedSummary parsed={parsed} />}
 
       {/* Anomaly alerts */}
@@ -278,7 +277,7 @@ export default function ContributionForm() {
           </div>
         )}
 
-        <div key={turnstileKey} className="cf-turnstile" data-sitekey={process.env.NEXT_PUBLIC_TURNSTILE_SITE_KEY} data-action="submit_contribution"></div>
+        <Turnstile key={turnstileKey} siteKey={process.env.NEXT_PUBLIC_TURNSTILE_SITE_KEY!} options={{ action: 'submit_contribution' }} />
 
         {/* Actions */}
         <div className="flex items-center gap-3 pt-1">

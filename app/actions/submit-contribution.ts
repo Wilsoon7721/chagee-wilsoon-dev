@@ -128,7 +128,7 @@ export async function submitContribution(formData: FormData): Promise<SubmitResu
       submitter_ip_hash: ipHash,
       user_agent: userAgentHeader,
       status: 'pending'
-    } as any)
+    } as object)
     .select('id')
     .single();
 

@@ -10,6 +10,7 @@
     "postinstall": "node -e \"require('fs').cpSync('node_modules/qr-scanner/qr-scanner-worker.min.js', 'public/qr-scanner-worker.min.js')\""
   },
   "dependencies": {
+    "@marsidev/react-turnstile": "^1.6.1",
     "@supabase/ssr": "^0.12.5",
     "@supabase/supabase-js": "^2.112.4",
     "@wilsoon/auth-core": "^2.0.2",
