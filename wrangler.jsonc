@@ -1,0 +1,33 @@
+{
+    "$schema": "./node_modules/wrangler/config-schema.json",
+    "main": ".open-next/worker.js",
+    "name": "chagee-wilsoon-dev",
+    "compatibility_date": "2026-02-26",
+    "compatibility_flags": [
+        "nodejs_compat",
+        "global_fetch_strictly_public"
+    ],
+    "assets": {
+        "directory": ".open-next/assets",
+        "binding": "ASSETS"
+    },
+    "services": [
+        {
+            "binding": "WORKER_SELF_REFERENCE",
+            "service": "chagee-wilsoon-dev"
+        }
+    ],
+    "observability": {
+        "enabled": false
+    },
+    "routes": [
+        {
+            "pattern": "chagee.wilsoon.dev",
+            "zone_name": "wilsoon.dev",
+            "custom_domain": true
+        }
+    ],
+    "images": {
+        "binding": "IMAGES"
+    }
+}

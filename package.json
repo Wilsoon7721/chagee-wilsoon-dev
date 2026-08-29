@@ -1,0 +1,44 @@
+{
+  "name": "chagee-wilsoon-dev",
+  "version": "1.0.0",
+  "private": true,
+  "scripts": {
+    "dev": "next dev",
+    "build": "next build",
+    "start": "next start",
+    "lint": "wlint",
+    "postinstall": "node -e \"require('fs').cpSync('node_modules/qr-scanner/qr-scanner-worker.min.js', 'public/qr-scanner-worker.min.js')\""
+  },
+  "dependencies": {
+    "@supabase/ssr": "^0.12.5",
+    "@supabase/supabase-js": "^2.112.4",
+    "@wilsoon/auth-core": "^2.0.2",
+    "@wilsoon/auth-next": "^2.0.2",
+    "@wilsoon/auth-react": "^2.0.2",
+    "@wilsoon/eslint-config": "^0.3.4",
+    "framer-motion": "^13.1.1",
+    "lucide-react": "^1.37.0",
+    "next": "16.3.3",
+    "qr-scanner": "^1.4.2",
+    "react": "19.2.8",
+    "react-dom": "19.2.8"
+  },
+  "devDependencies": {
+    "@opennextjs/cloudflare": "^1.20.4",
+    "@tailwindcss/postcss": "^4",
+    "@types/node": "^20",
+    "@types/react": "^19",
+    "@types/react-dom": "^19",
+    "eslint": "^9",
+    "eslint-config-next": "16.3.3",
+    "tailwindcss": "^4",
+    "typescript": "^5",
+    "wrangler": "^4.127.1"
+  },
+  "allowScripts": {
+    "unrs-resolver@1.12.2": true,
+    "@wilsoon/eslint-config@*": true,
+    "esbuild@0.28.1": true,
+    "workerd@1.20260828.1": true
+  }
+}
