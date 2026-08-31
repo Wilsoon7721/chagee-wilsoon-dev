@@ -94,7 +94,8 @@ export async function submitContribution(formData: FormData): Promise<SubmitResu
     const fileName = `${Date.now()}-${Math.random().toString(36).slice(2)}.${ext}`;
     imagePath = `contributions/${parsed.skuValue}/${fileName}`;
 
-    const { error: uploadError } = await supabase.storage.from(BUCKET_NAME).upload(imagePath, imageFile, { contentType: imageFile.type, upsert: false });
+    const fileBuffer = await imageFile.arrayBuffer();
+    const { error: uploadError } = await supabase.storage.from(BUCKET_NAME).upload(imagePath, fileBuffer, { contentType: imageFile.type, upsert: false });
 
     if (uploadError) {
       console.error('[submit] image upload failed:', uploadError.message);
