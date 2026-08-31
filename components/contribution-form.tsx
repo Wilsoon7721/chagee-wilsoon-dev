@@ -1,5 +1,6 @@
 'use client';
 
+import { createUploadUrl } from '@/app/actions/create-upload-url';
 import { submitContribution } from '@/app/actions/submit-contribution';
 import type { ParsedQrPayload } from '@/lib/database.types';
 import { decodeCupSize, decodeIceLevel, decodeMilkType, detectAnomalies, extractSweetnessPreset, getKnownDrinkName, getSkuType, isKnownSku, parseQrPayload, type DynamicSkuMap, type PayloadAnomaly } from '@/lib/qr-parser';
@@ -113,6 +114,44 @@ export default function ContributionForm({ dynamicSkus }: { dynamicSkus?: Dynami
 
     startTransition(async () => {
       setSubmitError(null);
+
+      const file = fileRef.current?.files?.[0];
+      if (file && file.size > 0) {
+        if (file.size > 10 * 1024 * 1024) {
+          setSubmitError('Image must be smaller than 10 MB.');
+          return;
+        }
+
+        const ext = file.name.split('.').pop()?.toLowerCase() ?? '';
+        const allowed = ['jpg', 'jpeg', 'png', 'webp', 'heic'];
+        if (!allowed.includes(ext)) {
+          setSubmitError('Image must be a JPG, PNG, WebP, or HEIC file.');
+          return;
+        }
+
+        const urlResult = await createUploadUrl(parsed.skuValue, file.name);
+        if (!urlResult.success || !urlResult.signedUrl || !urlResult.path) {
+          setSubmitError(urlResult.error ?? 'Failed to prepare image upload.');
+          return;
+        }
+
+        try {
+          const uploadRes = await fetch(urlResult.signedUrl, {
+            method: 'PUT',
+            headers: { 'Content-Type': file.type },
+            body: file
+          });
+          if (!uploadRes.ok) throw new Error(`Upload failed: ${uploadRes.status}`);
+        } catch (err: any) {
+          setSubmitError(`Image upload failed: ${err.message}`);
+          return;
+        }
+
+        formData.set('imagePath', urlResult.path);
+      }
+
+      formData.delete('imageFile');
+
       const result = await submitContribution(formData);
       if (result.success) setStep('done');
       else {

@@ -18,7 +18,7 @@ export async function submitContribution(formData: FormData): Promise<SubmitResu
   const reportedSweetness = (formData.get('reportedSweetness') as SweetnessLevel | null) || null;
   const reportedIce = (formData.get('reportedIce') as IceLevel | null) || null;
   const reportedMilkType = (formData.get('reportedMilkType') as string | null)?.trim() || null;
-  const imageFile = formData.get('imageFile') as File | null;
+  const imagePath = (formData.get('imagePath') as string | null)?.trim() || null;
   const userAgentHeader = (await headers()).get('user-agent') ?? '';
 
   if (!rawPayload) return { success: false, error: 'QR payload is missing.' };
@@ -45,7 +45,7 @@ export async function submitContribution(formData: FormData): Promise<SubmitResu
     isModified = reportedDrinkName !== defaultDrinkName || (reportedSize || 'regular') !== defaultSize || (reportedIce || '') !== defaultIce || (reportedMilkType || '') !== defaultMilk;
   }
 
-  if (isModified && (!imageFile || imageFile.size === 0)) return { success: false, error: 'A sticker photo is required if you modify the autofilled values (or for unmapped items).' };
+  if (isModified && !imagePath) return { success: false, error: 'A sticker photo is required if you modify the autofilled values (or for unmapped items).' };
 
   const forwardedFor = (await headers()).get('x-forwarded-for') ?? '';
   const ip = forwardedFor.split(',')[0]?.trim() || 'unknown';
@@ -80,28 +80,13 @@ export async function submitContribution(formData: FormData): Promise<SubmitResu
     return { success: false, error: `CAPTCHA verification failed: ${err.message}` };
   }
 
-  let imagePath: string | null = null;
   let imageUrl: string | null = null;
 
-  if (imageFile && imageFile.size > 0) {
-    if (imageFile.size > 10 * 1024 * 1024) return { success: false, error: 'Image must be smaller than 10 MB.' };
-
-    const ext = imageFile.name.split('.').pop()?.toLowerCase() ?? 'jpg';
-    const allowed = ['jpg', 'jpeg', 'png', 'webp', 'heic'];
-    if (!allowed.includes(ext)) return { success: false, error: 'Image must be a JPG, PNG, WebP, or HEIC file.' };
+  if (imagePath) {
+    // Validate the path looks like a legitimate contribution image path
+    if (!imagePath.startsWith('contributions/')) return { success: false, error: 'Invalid image path.' };
 
     const supabase = createPrivilegedSupabaseClient();
-    const fileName = `${Date.now()}-${Math.random().toString(36).slice(2)}.${ext}`;
-    imagePath = `contributions/${parsed.skuValue}/${fileName}`;
-
-    const fileBuffer = await imageFile.arrayBuffer();
-    const { error: uploadError } = await supabase.storage.from(BUCKET_NAME).upload(imagePath, fileBuffer, { contentType: imageFile.type, upsert: false });
-
-    if (uploadError) {
-      console.error('[submit] image upload failed:', uploadError.message);
-      return { success: false, error: `Image upload failed: ${uploadError.message}` };
-    }
-
     const { data: signedData } = await supabase.storage.from(BUCKET_NAME).createSignedUrl(imagePath, 60 * 60 * 24 * 365 * 10);
     imageUrl = signedData?.signedUrl ?? null;
   }
